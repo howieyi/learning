@@ -1,0 +1,19 @@
+{
+  "name": "learning",
+  "version": "0.0.1",
+  "description": "面经宝典",
+  "homepage": "",
+  "directories": {
+    "doc": "src"
+  },
+  "scripts": {
+    "dev": "docsify serve src"
+  },
+  "repository": {
+    "type": "git",
+    "url": " https://github.com/howieyi/learning.git"
+  },
+  "author": "huyi247767221@163.com",
+  "license": "ISC",
+  "dependencies": {}
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="UTF-8"/>
+  <title>面经宝典</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="description" content="面经宝典"/>
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+  <link rel="shortcut icon" href="/assets/images/favicon.ico" type="image/x-icon"/>
+  <link rel="stylesheet" href="//unpkg.com/docsify/lib/themes/vue.css"/>
+</head>
+<body>
+<div id="app"></div>
+<script>
+  window.$docsify = {
+    name: "面经宝典",
+    themeColor: '#1890ff',
+    executeScript: true,
+    coverpage: true,
+    loadNavbar: true,
+    loadSidebar: true,
+    // autoHeader: true, // 菜单标题自动继承
+    // mergeNavbar: true,
+    homepage: 'home.md',
+    alias: {
+      "/.*/_sidebar.md": "/_sidebar.md",
+      "/.*/_navbar.md": "/_navbar.md",
+      "/.*/_coverpage.md": "/_coverpage.md"
+    },
+    subMaxLevel: 2,
+    search: {
+      maxAge: 86400000, // 过期时间，单位毫秒，默认一天
+      paths: "auto", // or 'auto'
+      placeholder: "请输入关键字",
+      noData: "暂无数据",
+      // 搜索标题的最大程级, 1 - 6
+      depth: 4
+    }
+  };
+</script>
+<script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
+<script src="//unpkg.com/docsify/lib/plugins/search.js"></script>
+<script src="//unpkg.com/prismjs/components/prism-typescript.js"></script>
+<script src="//unpkg.com/prismjs/components/prism-jsx.js"></script>
+</body>
+</html>
