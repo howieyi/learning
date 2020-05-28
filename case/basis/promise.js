@@ -5,7 +5,7 @@ function resolve(value) {
   if (_this._status !== "pending") return;
 
   setTimeout(function () {
-    _this._status = "resolved";
+    _this._status = "fulfilled";
     _this._value = value;
     _this._onResolvedFns.forEach(function (cb) {
       cb && cb();
@@ -28,6 +28,14 @@ function reject(error) {
   });
 }
 
+function isFunction(func) {
+  return typeof func === "function";
+}
+
+function isObject(func) {
+  return typeof func === "object";
+}
+
 /**
  * 解析 promise
  *  若回调为 promise 实例，则继续流式解析
@@ -45,7 +53,7 @@ function resolvePromise(promise, result, resolve, reject) {
     result.then(function (newResult) {
       resolvePromise(promise, newResult, resolve, reject);
     }, reject);
-  } else if (typeof result === "object" || typeof result === "function") {
+  } else if (isObject(result) || isFunction(result)) {
     if (result === null) return resolve(result);
 
     var then;
@@ -56,39 +64,37 @@ function resolvePromise(promise, result, resolve, reject) {
       return reject(error);
     }
 
-    if (typeof result === "function") {
-      var called = false; // 调用锁
+    if (!isFunction(then)) return resolve(result);
 
-      try {
-        var _thenLock = function (cb) {
-          // 防止再次调用
-          if (called) return;
-          called = true; // 标记锁
-          cb && cb();
-        };
+    var called = false; // 调用锁
 
-        // then 流式调用
-        then.call(
-          result,
-          function (nextResult) {
-            _thenLock(function () {
-              resolvePromise(promise, nextResult, resolve, reject);
-            });
-          },
-          function (r) {
-            //只要失败了就失败了
-            _thenLock(function () {
-              reject(r);
-            });
-          }
-        );
-      } catch (e) {
-        _thenLock(function () {
-          reject(e);
-        });
-      }
-    } else {
-      resolve(result);
+    try {
+      var _thenLock = function (cb) {
+        // 防止再次调用
+        if (called) return;
+        called = true; // 标记锁
+        cb && cb();
+      };
+
+      // then 流式调用
+      then.call(
+        result,
+        function (nextResult) {
+          _thenLock(function () {
+            resolvePromise(promise, nextResult, resolve, reject);
+          });
+        },
+        function (r) {
+          //只要失败了就失败了
+          _thenLock(function () {
+            reject(r);
+          });
+        }
+      );
+    } catch (e) {
+      _thenLock(function () {
+        reject(e);
+      });
     }
   } else {
     resolve(result);
@@ -96,14 +102,14 @@ function resolvePromise(promise, result, resolve, reject) {
 }
 
 function Promise(fn) {
-  if (typeof this !== "object") {
-    throw new TypeError("Promises 必须是 new 实例化的对象");
+  if (!isObject(this)) {
+    throw new TypeError("Promise 必须是 new 实例化的对象");
   }
-  if (typeof fn !== "function") {
+  if (!isFunction(fn)) {
     throw new TypeError("Promise 构造函数入参必须是函数");
   }
 
-  // 状态 pending/resolved/rejected
+  // 状态 pending/fulfilled/rejected
   this._status = "pending"; // 默认 pending
   this._value = null; // 值
   this._error = null; // 异常
@@ -123,17 +129,13 @@ function Promise(fn) {
 
 // 原型方法 then, 返回新的promise形成链式调用
 Promise.prototype.then = function (onResolved, onRejected) {
-  var isFunc = function (func) {
-    return typeof func === "function";
-  };
-
   // then 接收两个函数，若果不是函数则直接造成值穿透，即上一个 then 的值继续向下走
-  onResolved = isFunc(onResolved)
+  onResolved = isFunction(onResolved)
     ? onResolved
     : function (y) {
         return y;
       };
-  onRejected = isFunc(onRejected)
+  onRejected = isFunction(onRejected)
     ? onRejected
     : function (err) {
         throw err;
@@ -167,10 +169,10 @@ Promise.prototype.then = function (onResolved, onRejected) {
     } else {
       setTimeout(function () {
         try {
-          // resolved / rejected 状态 解析回调
+          // fulfilled / rejected 状态 解析回调
           resolvePromise(
             promise,
-            _this._status === "resolved"
+            _this._status === "fulfilled"
               ? onResolved(_this._value)
               : onRejected(_this._error),
             resolve,

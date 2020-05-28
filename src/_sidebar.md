@@ -1,2 +1,0 @@
-- 基础篇
-    - [必知必会之Promise](/pages/basis/Promise)

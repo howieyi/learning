@@ -12,5 +12,5 @@ Promise.deferred = function () {
 
 module.exports = Promise;
 
-// Promise.resolve(1).then((res) => console.log("then@", res));
+// Promise.resolve(undefined).then((res) => undefined).then(res => console.log(res));
 // console.log(Promise.resolve(1) instanceof Promise);

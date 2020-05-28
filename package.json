@@ -7,7 +7,6 @@
     "doc": "src"
   },
   "scripts": {
-    "dev": "docsify serve src",
     "test:promise": "promises-tests ./case/basis/promise.spec.js"
   },
   "repository": {
