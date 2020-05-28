@@ -9,6 +9,6 @@
 - [必知必会之Promise](./src/basis/Promise.md)
 
 ## 算法篇
-- [LeetCode](./src/arithmetic/index)
+- [LeetCode](./src/arithmetic/index.md)
 
 ?> _TODO_ 待补充
