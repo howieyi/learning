@@ -210,26 +210,256 @@ Promise.resolve(1)
 1;
 ```
 
-### 手写实现
+### 造轮子
+
 #### 结构
+
 ```javascript
-function Promise(fn){}
+function Promise(fn) {}
 
 // 中断抛出结果集
-Promise.resolve = function(value){}
+Promise.resolve = function (value) {};
 // 中断抛出异常
-Promise.reject = function(reason){}
+Promise.reject = function (reason) {};
 // 返回多个promise集合请求中最快返回的结果
-Promise.race = function(iterable){}
+Promise.race = function (iterable) {};
 // 返回多个promise集合所有不论正常或者异常的结果集
-Promise.allSettled = function(iterable){}
+Promise.allSettled = function (iterable) {};
 // 返回多个promise集合所有正常的结果集，有错误则中断返回该错误结果
-Promise.all = function(iterable){}
+Promise.all = function (iterable) {};
 
 // 原型方法 then, 返回新的promise形成链式调用
-Promise.prototype.then = function(onResolved, onRejected){}
+Promise.prototype.then = function (onResolved, onRejected) {};
 // 原型方法 catch, 抛出异常
-Promise.prototype.catch = function(onError){}
+Promise.prototype.catch = function (onError) {};
 // 原型方法 promise 正常或者异常之后的最后一次处理
-Promise.prototype.finally = function(onFinally){}
+Promise.prototype.finally = function (onFinally) {};
 ```
+
+#### Promise 构造函数
+
+```javascript
+function resolve(value) {
+  if (value instanceof Promise) {
+    return value.then(resolve, reject);
+  }
+
+  var _this = this;
+
+  // 状态不为 pending 则不执行，这里避免多次触发
+  if (_this._status !== "pending") return;
+
+  setTimeout(function () {
+    _this._status = "resolved";
+    _this._value = value;
+    _this._onResolvedFns.forEach(function (it) {
+      it && it();
+    });
+  });
+}
+
+function reject(error) {
+  var _this = this;
+
+  // 状态不为 pending 则不执行，这里避免多次触发
+  if (_this._status !== "pending") return;
+
+  setTimeout(function () {
+    _this._status = "rejected";
+    _this._error = error;
+    _this._onRejectedFns.forEach(function (it) {
+      it && it();
+    });
+  });
+}
+
+function Promise(fn) {
+  if (typeof this !== "object") {
+    throw new TypeError("Promises 必须是 new 实例化的对象");
+  }
+  if (typeof fn !== "function") {
+    throw new TypeError("Promise 构造函数入参必须是函数");
+  }
+
+  // 状态 pending/resolved/rejected
+  this._status = "pending"; // 默认 pending
+  this._value = null; // 值
+  this._error = null; // 异常
+
+  // 成功的回调
+  this._onResolvedFns = [];
+  // 失败的回调
+  this._onRejectedFns = [];
+
+  try {
+    // 绑定当前上下文
+    fn(resolve.bind(this), reject.bind(this));
+  } catch (e) {
+    reject(e);
+  }
+}
+```
+
+#### `Promise.prototype.then` 链式回调
+
+```javascript
+/**
+ * 解析 promise
+ *  若回调为 promise 实例，则继续流式解析
+ *
+ * @param {*} promise
+ * @param {*} result 回调结果
+ * @param {*} resolve
+ * @param {*} reject
+ */
+function resolvePromise(promise, result, resolve, reject) {
+  // 循环引用检测
+  if (promise === result) return reject(new TypeError("循环引用"));
+
+  if (!result || (typeof result !== "object" && typeof result !== "function"))
+    return resolve(result);
+
+  var called; // 调用锁
+  var thenCheck = function (cb) {
+    // 防止再次调用
+    if (called) return;
+    called = true; // 标记锁
+    cb && cb();
+  };
+
+  try {
+    var then = result.then;
+
+    // then 不为原型方法 或者 result 不是 Promise 的实例，这个时候直接抛出即可
+    if (then !== Promise.prototype.then || !(result instanceof Promise))
+      return resolve(result);
+
+    // then 流式调用
+    then.call(
+      x,
+      function (nextResult) {
+        thenCheck(function () {
+          resolvePromise(promise, nextResult, resolve, reject);
+        });
+      },
+      function (r) {
+        //只要失败了就失败了
+        thenCheck(function () {
+          reject(r);
+        });
+      }
+    );
+  } catch (e) {
+    thenCheck(function () {
+      reject(e);
+    });
+  }
+}
+
+// 原型方法 then, 返回新的promise形成链式调用
+Promise.prototype.then = function (onResolved, onRejected) {
+  var isFunc = function (func) {
+    return typeof func === "function";
+  };
+
+  // then 接收两个函数，若果不是函数则直接造成值穿透，即上一个 then 的值继续向下走
+  onResolved = isFunc(onResolved)
+    ? onResolved
+    : function (y) {
+        return y;
+      };
+  onRejected = isFunc(onRejected)
+    ? onRejected
+    : function (err) {
+        throw err;
+      };
+
+  var _this = this;
+
+  var promise = new Promise(function (resolve, reject) {
+    setTimeout(function () {
+      try {
+        if (_this._status === "pending") {
+          // pending 状态
+          // 存放成功回调
+          _this._onResolvedFns.push(function () {
+            setTimeout(function () {
+              resolvePromise(
+                promise,
+                onResolved(_this._value),
+                resolve,
+                reject
+              );
+            });
+          });
+          // 存放失败的回调
+          _this._onRejectedFns.push(function () {
+            setTimeout(function () {
+              resolvePromise(
+                promise,
+                onRejected(_this._error),
+                resolve,
+                reject
+              );
+            });
+          });
+        } else {
+          // resolved / rejected 状态 解析回调
+          resolvePromise(
+            promise,
+            _this._status === "resolved"
+              ? onResolved(_this._value)
+              : onRejected(_this._error),
+            resolve,
+            reject
+          );
+        }
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+};
+```
+
+#### `Promise.prototype.catch` 异常捕获
+
+```javascript
+// 原型方法 catch, 抛出异常
+Promise.prototype.catch = function (onError) {
+  // catch 方法就是then方法没有成功的简写
+  return this.then(null, onError);
+};
+```
+
+#### `Promise.prototype.finally` 结束调用
+
+```javascript
+// 原型方法 promise 正常或者异常之后的最后一次处理
+Promise.prototype.finally = function (onFinally) {
+  var _finally = Promise.resolve(onFinally());
+
+  return this.then(
+    function (value) {
+      return _finally.then(function () {
+        return value;
+      });
+    },
+    function (error) {
+      return _finally.then(function () {
+        throw error;
+      });
+    }
+  );
+};
+```
+
+### 学习参考
+
+- [promise 源码参考](https://github.com/then/promise)
+- [Promise MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+- [Promise 必知必会的十道题](https://juejin.im/post/5a04066351882517c416715d)
+- [100 行代码实现 Promises/A+ 规范](https://mp.weixin.qq.com/s/qdJ0Xd8zTgtetFdlJL3P1g)
+- [你好，JavaScript 异步编程—— 理解 JavaScript 异步的美妙](https://juejin.im/post/5b56c3586fb9a04faa79a8e0)
+- [一起学习造轮子（一）：从零开始写一个符合 Promises/A+规范的 promise](https://juejin.im/post/5b16800fe51d4506ae719bae#heading-34)
+- [Promise 实现原理（附源码）](https://juejin.im/post/5b83cb5ae51d4538cc3ec354)

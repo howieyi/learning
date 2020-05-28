@@ -7,7 +7,8 @@
     "doc": "src"
   },
   "scripts": {
-    "dev": "docsify serve src"
+    "dev": "docsify serve src",
+    "test:promise": "promises-tests ./case/basis/promise.spec.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,10 @@
   },
   "author": "huyi247767221@163.com",
   "license": "ISC",
-  "dependencies": {}
+  "dependencies": {
+    "promises-tests": "^0.0.2"
+  },
+  "devDependencies": {
+    "mocha": "^7.2.0"
+  }
 }
