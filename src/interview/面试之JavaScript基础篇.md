@@ -584,7 +584,7 @@ function checkNaN(val) {
 
 ```javascript
 function isEven(num) {
-  return num & (1 === 0);
+  return (num & 1) === 0;
 }
 ```
 
@@ -600,9 +600,9 @@ function isEven(num) {
 
 26. 检测对象中存在某个属性
 
-- `prop in obj`：返回布尔值
-- `obj.hasOwnProperty(prop)`：返回布尔值
-- `obj["prop"]`：返回值或者 `undefined`
+- `prop in obj`：返回布尔值，指示指定的属性在指定的对象或其原型链中；
+- `obj.hasOwnProperty(prop)`：返回布尔值，指示对象自身属性中是否具有指定的属性，因此这个方法会忽略掉那些从原型链上继承到的属性；
+- `obj["prop"]`：读取属性值，存在则返回值，否则返回 `undefined`；
 
 27. AJAX?
 
@@ -620,3 +620,45 @@ function isEven(num) {
 - `对象字面量`, `var a = {}`;
 - `构造函数`, `function a(){} var o = new a()`;
 - `Object.create`
+
+29. `const`、`Object.seal` 和 `Object.freeze` 区别？
+
+- `Object.seal`：方法封闭一个对象，阻止添加新属性并将所有现有属性标记为不可配置。当前属性的值只要可写就可以改变。
+- `Object.freeze`：方法可以冻结一个对象。一个被冻结的对象再也不能被修改；冻结了一个对象则不能向这个对象添加新的属性，不能删除已有属性，不能修改该对象已有属性的可枚举性、可配置性、可写性，以及不能修改已有属性的值。此外，冻结一个对象后该对象的原型也不能被修改。`freeze()` 返回和传入的参数相同的对象。
+- `const`： 声明一个只读的变量，一旦声明，常量的值就不可改变；
+
+30. `函数表达式`和`函数声明`之间有什么区别？
+
+```javascript
+a();
+b();
+
+function a() {
+  console.log("函数表达式：我会被提升到顶部");
+}
+
+var b = function () {
+  console.log("函数声明：我没有被提升");
+};
+```
+
+31. `typeof null`?
+
+- `typeof null === 'object'`：自 JS 诞生以来 null 的实现。曾经有人提出将`typeof null == 'object'`修改为`typeof null == 'null'`，但是被拒绝了，因为这将导致更多的`bug`。
+
+32. `new` 做了什么?
+
+- `new` 关键字与构造函数一起使用以创建对象，主要做了 4 件事:
+  - 创建空对象 `{}`
+  - 将空对象分配给 `this` 值
+  - 将空对象的 `proto` 指向构造函数的 `prototype`
+  - 如果没有使用显式 `return` 语句，则返回 `this`
+
+33. 什么时候不使用箭头函数?
+
+- 当想要函数被提升时(箭头函数是匿名的)
+- 要在函数中使用 `this`/`arguments` 时，由于箭头函数本身不具有 `this`/`arguments`，因此它们取决于外部上下文
+- 使用命名函数(箭头函数是匿名的)
+- 使用函数作为构造函数时(箭头函数没有构造函数)
+- 当想在对象字面是以将函数作为属性添加并在其中使用对象时，因为咱们无法访问 this 即对象本身。
+
