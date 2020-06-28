@@ -1,0 +1,98 @@
+<script>
+  Function.prototype.newApply = function (thisArg, argsArray) {
+    // 如果 引用对象不合法 则抛出异常
+    if (typeof this !== "function")
+      throw new TypeError(this + " is not a function");
+
+    // 如果参数不合法 则默认参数为空数组
+    if (typeof argsArray === "undefined" || argsArray === null) argsArray = [];
+
+    // 如果 thisArg 不合法 则引用 window 对象
+    if (thisArg === null || typeof thisArg === "undefined") thisArg = window;
+
+    var key = Symbol();
+    // 引用当前 this
+    thisArg[key] = this;
+    // 调用 this 方法， 其实这里的对象作用域已经转嫁到 thisAry
+    // 这里 ... 拓展是 es7 的语法糖，部分浏览器并不支持
+    var result = thisArg[key](...argsArray);
+
+    // 清理缓存 this
+    delete thisArg[key];
+    return result;
+  };
+
+  Function.prototype.newCall = function (thisArg) {
+    // 如果 引用对象不合法 则抛出异常
+    if (typeof this !== "function")
+      throw new TypeError(this + " is not a function");
+
+    // 如果 thisArg 不合法 则引用 window 对象
+    if (thisArg === null || typeof thisArg === "undefined") thisArg = window;
+
+    var key = Symbol();
+    var argsArray = Array.prototype.slice.call(arguments, 1);
+
+    // 引用当前 this
+    thisArg[key] = this;
+    // 调用 this 方法， 其实这里的对象作用域已经转嫁到 thisAry
+    // 这里 ... 拓展是 es7 的语法糖，部分浏览器并不支持
+
+    var result = thisArg[key](...argsArray);
+    delete thisArg[key];
+
+    return result;
+  };
+
+  Function.prototype.newBind = function (thisArg) {
+    // 如果 引用对象不合法 则抛出异常
+    if (typeof this !== "function")
+      throw new TypeError(this + " is not a function");
+
+    var that = this;
+    var slice = Array.prototype.slice;
+    var args = slice.call(arguments, 1);
+    var fn = function () {};
+    var newFunc = function () {
+      var isInstanceFn = this instanceof fn;
+      // 返回fBond的引用，由外部按需调用
+      newFunc.prototype = isInstanceFn ? new fn() : newFunc.prototype;
+      return that.apply(
+        // this instanceof fn 则 this 为 new 的对象
+        // 否则 取传入的 thisArg，再 newFunc 自己
+        isInstanceFn ? this : thisArg || this,
+        args.concat(slice.call(arguments))
+      );
+    };
+
+    // 将目标函数的原型对象拷贝到新函数中，因为目标函数有可能被当作构造函数使用
+    this.prototype && (fn.prototype = this.prototype);
+    return newFunc;
+  };
+
+  function A(name, age) {
+    this.name = name;
+    this.age = age;
+    this.toString = function () {
+      console.log(this.name + " : " + this.age);
+    };
+  }
+
+  function B(name, age, city) {
+    // A.newApply(this, [name, age]);
+    A.newCall(this, name, age);
+
+    this.city = city;
+    this.toString = function () {
+      console.log(this.name + " : " + this.age + " : " + city);
+    };
+  }
+
+  var b = new B("张三", 20, "上海");
+  b.toString();
+
+  var C = B.newBind();
+  var c = new C("李四", 26, "北京");
+  // console.log(C, c);
+  c.toString();
+</script>
