@@ -49,18 +49,21 @@
  * @return {number}
  */
 var removeDuplicates = function (nums) {
-  if (!nums || !nums.length) return 0;
+  if (!nums) return 0;
 
-  var mapping = {};
-  for (var i = 0; i < nums.length; i++) {
-    if (mapping[nums[i]]) {
-      nums.splice(i, 1);
-      i--;
+  if (nums.length === 1) return 1;
+
+  var j = 0;
+  for (var i = 1; i < nums.length; i++) {
+    // 重复则下一个
+    if (nums[i] === nums[j]) {
+      continue;
     }
-    mapping[nums[i]] = true;
+    // 否则记录
+    nums[++j] = nums[i];
   }
 
-  return nums.length;
+  return j + 1;
 };
 
 //leetcode submit region end(Prohibit modification and deletion)

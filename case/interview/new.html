@@ -1,0 +1,33 @@
+<script>
+  function Person(name, age) {
+    this.name = name;
+    this.age = age;
+    this.toString = function () {
+      console.log(this.name + " : " + this.age);
+    };
+    this.toString();
+  }
+
+  var bob = new Person("Bob", 25);
+  console.log(bob);
+
+  console.log(_new(Person, "Lily", 22));
+
+  function _new(target) {
+    if (typeof target !== "function")
+      throw new TypeError("target must be a function");
+
+    // 1. 创建一个全新的对象
+    var obj = {};
+    // 2. __proto__ 指向对象原型
+    obj.__proto__ = target.prototype;
+    // 3. 绑定上下文到 obj
+    var result = target.apply(obj, Array.prototype.slice.call(arguments, 1));
+
+    // 4.如果该函数没有返回对象，则返回新创建的对象
+    var isObject = typeof result === "object" && result !== null;
+    var isFunction = typeof result === "function";
+
+    return isObject || isFunction ? result : obj;
+  }
+</script>

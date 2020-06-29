@@ -1,0 +1,33 @@
+<script>
+  function _const(key, value) {
+    // 由于ES5环境没有block的概念，所以是无法百分百实现const，只能是挂载到某个对象下，要么是全局的window，要么就是自定义一个object来当容器
+    window[key] = value;
+    Object.defineProperty(window, key, {
+      enumerable: false,
+      configurable: false,
+      get: function () {
+        return value;
+      },
+      set: function (newValue) {
+        if (newValue !== value) {
+          throw TypeError("只读变量，不可修改");
+        } else {
+          return value;
+        }
+      },
+    });
+  }
+
+  _const("a", 10);
+  console.log(a);
+  delete a;
+  console.log(a);
+  for (let item in window) {
+    // 因为const定义的属性在global下也是不存在的，所以用到了enumerable: false来模拟这一功能
+    if (item === "a") {
+      // 因为不可枚举，所以不执行
+      console.log(window[item]);
+    }
+  }
+  a = 20; // 报错
+</script>
