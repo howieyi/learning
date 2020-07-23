@@ -1,6 +1,5 @@
 
 # `leetcode` 算法历程
-![](./process.png)
 
 ## [数组](./week1-array)
 
