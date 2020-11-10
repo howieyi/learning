@@ -1,3 +1,5 @@
+## 本地化环境搭建
+
 ### 必备条件
 
 1. 空闲内存大于 2G 的服务器环境，sentry 基本配置需要占用至少 2G 内存
@@ -92,4 +94,67 @@ docker-compose logs <service-name>
 
 5. nginx 代理 9000 端口，对外访问
 
+```bash
+server {
+   listen       80;
+   server_name  sentry.example.com;
 
+	location / {
+            proxy_set_header       Host $host;
+            proxy_set_header       X-Real-IP remote_addr;
+            proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass             http://127.0.0.1:9000;
+   }
+}
+```
+
+## sentry 前端接入
+
+> 这里采用外网 `github` 账号方式登入
+
+1. [sentry.io](https://sentry.io) 登入，使用 `github` 方式登入；
+2. 新建组织
+3. 新建项目
+4. 前端代码引入
+   > 在 `sentry` 中有范例，这里为了不影响主程序加载，改为异步引入方式
+
+- 主代码文件 `a.js`，这里放入 sentry 对应引入代码
+
+```javascript
+// 这里以 react 项目为例
+// 官方采用的是 *，这里改为 tree shaking 部分引入方式
+import { init } from "@sentry/react";
+import { Integrations } from "@sentry/tracing";
+
+const isDev = false; // 开发环境 or 测试环境
+const sdn = "新建项目中 dsn 配置";
+
+export default function initSentry() {
+  init({
+    dsn: `${dsn}`,
+    integrations: [new Integrations.BrowserTracing()],
+
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+  });
+}
+```
+
+- 异步引入代码
+
+```javascript
+const isDev = false; // 开发环境 or 测试环境
+
+/**
+ * 初始化平台 sentry
+ */
+export const initAsyncSentry = () =>
+  // 生产环境引入
+  !isDev &&
+  import(/* webpackChunkName: "sentry" */ "./a").then((res) => res.default());
+```
+
+- 到这里前端的日志基本已经可以进行采集，但是到这里还没有使用到 sentry 的强大功能，错误日志还没办法定位到源开发代码；
+
+5. 上传 sourceMap 到 sentry，借此定位到具体的开发错误代码
