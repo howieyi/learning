@@ -23,8 +23,8 @@ curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
 yum install -y python3
 ```
 
-3. 使用 `pip3` 安装 `docker-compose`
-   > Compose 是用于定义和运行多容器 Docker 应用程序的工具。通过 Compose，您可以使用 YML 文件来配置应用程序需要的所有服务。然后，使用一个命令，就可以从 YML 文件配置中创建并启动所有服务。
+3. 使用 `pip3` 安装 `docker-compose`   
+> Compose 是用于定义和运行多容器 Docker 应用程序的工具。通过 Compose，您可以使用 YML 文件来配置应用程序需要的所有服务。然后，使用一个命令，就可以从 YML 文件配置中创建并启动所有服务。
 
 ```bash
 # 安装 docker-compose 当前文档版本
@@ -108,7 +108,14 @@ server {
 }
 ```
 
-## sentry 前端接入
+### 本地化小结
+1. sentry 整体继承了非常多的工具（`memcached`/`redis`/`postgres`/`zookeeper`/`kafka`/`clickhouse`...），非常庞大，这也是其需要至少2G内存支持的原因了，并且适合集群部署；
+2. 本地化部署慎重考虑后期维护成本
+3. 基本使用其实直接使用线上的就足够了
+
+## 前端接入 [sentry.io](https://sentry.io)
+
+### 基本流程
 
 > 这里采用外网 `github` 账号方式登入
 
@@ -131,6 +138,10 @@ const sdn = "新建项目中 dsn 配置";
 
 export default function initSentry() {
   init({
+    // 版本号，这里的 release 需要与后续 webpack 上传的版本号一致
+    release: `${release}`,
+    // 这里可以定义 环境变量，用作区分不同环境 比如 SIT/UAT/PROD，定义后再 sentry 中可以对应用作筛选
+    environment: `${environment}`,
     dsn: `${dsn}`,
     integrations: [new Integrations.BrowserTracing()],
 
@@ -151,10 +162,70 @@ const isDev = false; // 开发环境 or 测试环境
  */
 export const initAsyncSentry = () =>
   // 生产环境引入
-  !isDev &&
-  import(/* webpackChunkName: "sentry" */ "./a").then((res) => res.default());
+  !isDev && import(/* webpackChunkName: "sentry" */ "./a").then(res => res.default());
 ```
 
 - 到这里前端的日志基本已经可以进行采集，但是到这里还没有使用到 sentry 的强大功能，错误日志还没办法定位到源开发代码；
 
 5. 上传 sourceMap 到 sentry，借此定位到具体的开发错误代码
+
+- 项目 webpack 打包生产环境需要 sourceMap 模式
+  > 这里需要注意不要把生成的 map 文件上传到生产环境服务器，相当于泄漏了代码的文件模块结构了
+
+```javascript
+// 1. 生产配置中，设置 devtool 为 hidden-source-map
+// 这样打包产物中会对应生成 map 文件
+
+// 2 生成配置打包压缩的时候，设置 sourceMap 为 true
+// 压缩打包的文件
+new TerserWebpackPlugin({
+  cache: false,
+  parallel: true, // 启用并行化
+  // 这里设置 sourceMap 为 true 即可生成对应的配置文件
+  sourceMap: true,
+  terserOptions: {
+    ecma: 5,
+    warnings: false,
+    compress: {
+      drop_debugger: true,
+      drop_console: true,
+    },
+    output: {
+      comments: false,
+    },
+  },
+});
+```
+
+- 上传 sourceMap 到 sentry
+  
+> 1. authToken 推荐在 sentry 中自己新建，`Settings -> Account -> API -> Auth Tokens`（这里主要考虑到多项目多环境多权限管理的问题，可以自定义）
+> 2. `${org}` 对应在 `settings -> General Settings` 中的 `Organization Slug` 属性，可以自定义；
+> 3. `${project}` 对应在 对应项目中 `General Settings` 中的姓名属性，可以自定义；
+> 4. `${release}` 这里需要自定义版本号，用作区分和定位每个版本的错误；
+
+```javascript
+// 使用 sentry 官方提供的 webpack 插件
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+
+// 追加 plugins 配置到 webpack 配置中
+new SentryWebpackPlugin({
+  authToken: `${authToken}`,
+  org: `${org}`,
+  project: `${project}`,
+  release: `${release}`, // 每次发布的版本号
+  // 不显示日志
+  silent: true,
+  // webpack specific configuration
+  include: "dist",
+});
+```
+
+- 代码托管到 sentry，目前 sentry 支持的仓库管理有 `Github/GitLab/Bitbucket/Azure DevOps`，对应安装插件，绑定好代码即可
+> 到这一步成功之后，sentry 即可帮您做到错误定位到具体代码了
+
+### 小结
+
+1. sentry 新建组织、项目（用作引入 sentry 错误抓取代码）
+2. webpack 生产打包支持 sourceMap（用作错误定位到具体源码）
+3. 上传 map 文件到 sentry 平台（@sentry/webpack-plugin）
