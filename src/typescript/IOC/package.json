@@ -1,0 +1,10 @@
+{
+  "name": "IOC",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@types/esprima": "^4.0.2",
+    "@types/estree": "^0.0.45"
+  }
+}
