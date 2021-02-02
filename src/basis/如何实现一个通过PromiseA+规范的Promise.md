@@ -57,7 +57,7 @@
 
 ### 核心要点
 
-• `process.nextTick` 和 `promise.then` 都属于 微任务（`microtask`），而 `setImmediate`、`setTimeout`、`setInterval` 属于 宏任务（`macrotask`），事件循环先执行宏任务，再执行所有微任务
+• `process.nextTick` 和 `promise.then` 都属于 微任务（`microtask`），而 `setImmediate`、`setTimeout`、`setInterval` 属于 宏任务（`macrotask`），事件循环先执行一个宏任务，再执行所有微任务
 • `Promise` 构造函数是同步执行的，`promise.then` 中的函数是异步执行的
 
 ```javascript
