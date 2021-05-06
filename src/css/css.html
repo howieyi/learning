@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS 捡漏</title>
+  </head>
+  <body>
+    <!-- shape-outside / display: flow-root -->
+    <div style="background-color: lightblue; display: flow-root">
+      <img width="100" height="100" style="float: left; shape-outside: circle(50%); margin: 30px" src="https://t7.baidu.com/it/u=4162611394,4275913936&fm=193&f=GIF" /> for him at his house, after
+      dinner, not later than eleven o’clock. This athletic young Frenchman belongs to a small set of Parisian sportsmen, who have taken up “ballooning” as a pastime. After having exhausted all the
+      sensations that are to be found in ordinary sports, even those of “automobiling” at a breakneck speed, the members of the “Aéro Club” now seek in
+    </div>
+
+    <!-- 合并margin引起的外边距 -->
+    <div style="background-color: purple; overflow: hidden">
+      <div style="height: 100px; margin-top: 20px"></div>
+    </div>
+
+    <!-- flex -->
+    <style>
+      .t-flex {
+        display: flex;
+        flex-direction: row;
+      }
+      .t-flex > div {
+        width: 20px;
+        height: 20px;
+        /* margin: auto; */
+        background-color: pink;
+      }
+    </style>
+    <div class="t-flex">
+      <div>1</div>
+      <div>2</div>
+      <div style="margin-right: auto">3</div>
+      <div>4</div>
+      <div>5</div>
+    </div>
+  </body>
+</html>
