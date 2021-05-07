@@ -39,8 +39,8 @@
 
 #### flex 与 margin 完美配合
 
-- `margin: auto` 可以配合 flex 等比在容器内撑开元素
-- `margin-left/margin-right: auto` 可以单独在容器内撑开某一元素
+- `margin: auto` 可以配合 flex 等比在父容器内撑开元素
+- `margin-left/margin-right: auto` 可以单独在父容器内撑开某一元素
 
 ```html
 <style>
@@ -60,6 +60,31 @@
   <div>2</div>
   <div style="margin-right: auto">3</div>
   <div>4</div>
+  <div>5</div>
+</div>
+```
+
+- `flex-grow` 之和小于 1，按照比例分配父级容器内剩余控件
+
+```html
+<style>
+  .t-flex {
+    display: flex;
+    flex-direction: row;
+    background-color: yellow;
+  }
+  .t-flex > div {
+    width: 20px;
+    height: 20px;
+    /* margin: auto; */
+    background-color: pink;
+  }
+</style>
+<div class="t-flex">
+  <div style="flex-grow: 0.1;">1</div>
+  <div style="flex-grow: 0.3;">2</div>
+  <div style="flex-grow: 0.3;">3</div>
+  <div style="flex-grow: 0.3;">4</div>
   <div>5</div>
 </div>
 ```

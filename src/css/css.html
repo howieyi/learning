@@ -24,6 +24,7 @@
       .t-flex {
         display: flex;
         flex-direction: row;
+        background-color: yellow;
       }
       .t-flex > div {
         width: 20px;
@@ -33,10 +34,10 @@
       }
     </style>
     <div class="t-flex">
-      <div>1</div>
-      <div>2</div>
-      <div style="margin-right: auto">3</div>
-      <div>4</div>
+      <div style="flex-grow: 0.1;">1</div>
+      <div style="flex-grow: 0.3;">2</div>
+      <div style="flex-grow: 0.3;">3</div>
+      <div style="flex-grow: 0.3;">4</div>
       <div>5</div>
     </div>
   </body>
