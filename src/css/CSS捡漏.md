@@ -162,3 +162,18 @@
   </dl>
 </div>
 ```
+
+#### flex、margin 实现简易居中
+
+```html
+<div style="width: 200px; height: 200px; display: flex; background-color: peru;">
+  <div style="width: 20px; height: 20px; background-color: aqua; margin: auto;"></div>
+</div>
+```
+
+### conic-gradient 锥形渐变
+
+```html
+<!-- 锥形渐变 -->
+<div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(red 0 20%, orange 20% 40%, yellow 40% 60%, green 60% 80%, blue 80% 100%);"></div>
+```
