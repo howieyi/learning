@@ -177,3 +177,100 @@
 <!-- 锥形渐变 -->
 <div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(red 0 20%, orange 20% 40%, yellow 40% 60%, green 60% 80%, blue 80% 100%);"></div>
 ```
+
+- 颜色盘
+
+```html
+<!-- 拾色器 -->
+<style>
+  /* $colors: ();
+  $totalStops: 20;
+
+  @for $i from 0 through $totalStops {
+    $colors: append($colors, hsl($i * (360deg / $totalStops), 100%, 50%), comma);
+  }
+
+  .colors {
+    width: 200px;
+    height: 200px;
+    background: conic-gradient($colors);
+    border-radius: 50%;
+  } */
+
+  .colors {
+    width: 200px;
+    height: 200px;
+    background: conic-gradient(
+      red,
+      #ff4d00,
+      #ff9900,
+      #ffe600,
+      #ccff00,
+      #80ff00,
+      #33ff00,
+      #00ff1a,
+      #00ff66,
+      #00ffb3,
+      cyan,
+      #00b3ff,
+      #0066ff,
+      #001aff,
+      #3300ff,
+      #8000ff,
+      #cc00ff,
+      #ff00e6,
+      #ff0099,
+      #ff004d,
+      red
+    );
+    border-radius: 50%;
+  }
+</style>
+<div class="colors"></div>
+```
+
+### repeating-conic-gradient 重复锥形渐变
+
+```html
+<!-- 重复锥形渐变  -->
+<div style="width: 100px; height: 100px; border-radius: 50%; background: repeating-conic-gradient(red 0 15deg, orange 0 30deg, yellow 0 45deg);"></div>
+```
+
+### animation-play-state 停止动画
+
+```html
+<!-- css 控制动画停止 -->
+<style>
+  @keyframes rotate {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .animation {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: repeating-conic-gradient(red 0 15deg, orange 0 30deg, yellow 0 45deg);
+    animation: rotate 1s linear infinite;
+    cursor: pointer;
+  }
+  .animation:hover {
+    animation-play-state: paused;
+  }
+</style>
+<div class="animation"></div>
+```
+
+### filter 滤镜虚化
+
+```html
+<!-- css 滤镜虚化 -->
+<style>
+  .animation:hover {
+    filter: blur(2px);
+  }
+</style>
+```
