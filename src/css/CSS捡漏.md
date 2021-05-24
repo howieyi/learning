@@ -274,3 +274,44 @@
   }
 </style>
 ```
+
+### 多行文本省略，... 处增加占位
+
+```html
+<!-- 多行省略，... 处增加占位 -->
+<div class="line2">
+  <div class="btn">展开</div>
+  最近 Zoom 国内又开放招聘了，我们组有了前端的
+  HC，所以我也参加了几场面试。合肥整体的前端氛围很一般，厉害的人比较少，来参加面试的偏初阶的比较多，不过我们面试也不卷，很少出一些复杂的算法题，面试难度并不高。我们对候选人的要求也没有那么高，基本上你能达到
+  p6 的水平，就能通过我的面试。当然，如果你是工作年限较久（六年以上）的老玩家，我对你的期望和要求也会相应的提高。
+</div>
+<style>
+  .line2 {
+    font-size: 14px;
+    width: 400px;
+    height: 76px;
+    line-height: 30px;
+    border: 1px solid #dfdfdf;
+    padding: 8px;
+    text-align: justify;
+    border-radius: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line2::before {
+    content: '';
+    float: right;
+    width: 0;
+    height: 30px;
+  }
+  .line2 .btn {
+    background-color: red;
+    float: right;
+    color: #fff;
+    clear: both;
+  }
+</style>
+```
