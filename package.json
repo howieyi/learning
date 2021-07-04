@@ -13,7 +13,7 @@
     "type": "git",
     "url": " https://github.com/howieyi/learning.git"
   },
-  "author": "huyi247767221@163.com",
+  "author": "水逆<huyi247767221@163.com>",
   "license": "ISC",
   "dependencies": {
     "promises-tests": "^0.0.2"
