@@ -60,25 +60,27 @@ program
     `  
   water create
   water dev
-  water prod -i -m [module] -e [env]
+  water prod -i -a [analyzerPort]
   water umd -i`
   )
   .description(
     `Params:
   
   dev:
-    -m [module] 模块名称
     -i 是否打印详细信息
   
   prod: 
-    -m [module] 模块名称
     -i 是否打印详细信息
-    -e [env] 环境变量
+    -a [analyzerPort] 是否开启代码依赖分析（默认端口8989）
+
+  umd:
+    -i 是否打印详细信息  
     `
   )
   .command('create', '初始化项目')
   .command('dev', '开发环境构建')
-  .command('prod', '生产环境构建');
+  .command('prod', '生产环境构建')
+  .command('umd', '公共包构建');
 
 program.parse(process.argv);
 ```
@@ -112,8 +114,6 @@ uriPrefix.forEach(uri => {
 module.exports = {
   // 自定义端口
   port: '3001',
-  // 依赖包分析路径
-  analyzerPort: null,
   // 项目根目录
   resolvePath: './src',
   // 构建主路径
@@ -344,14 +344,12 @@ $ sudo npm install -g --production --unsafe-perm=true --allow-root iwr
 ## v1.0.0
 
 - 集成 cli 工具 `iwr`，主要为实现 `react 项目` 的构建;
-- 实现 `iwr dev`：开发模式下构建；
-- 实现 `iwr prod`：生产环境下打包；
-- 实现 `iwr umd`：制作 umd 包；
-- 实现 `iwr create`：快速初始化 `react 项目`;
-- 定制 react 项目简易模板，以供初始化调用；
 ```
 
 3. readme 写写好，总得让别人用的明明白白的，[范例](https://github.com/howieyi/water-react/blob/v1.0.1/README.md)
 
-4. ora，命令行加个异步等待 loading，上档次
+4. 接入 [download-git-repo](https://www.npmjs.com/package/download-git-repo) 以仓库方式替换本地模板方式，更加方便维护模板代码
+
+5. 接入 [ora](https://www.npmjs.com/package/ora) 增加脚本执行缓冲，命令行加个异步等待 loading，上档次
 ![](./ora.svg)
+
