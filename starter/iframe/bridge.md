@@ -16,10 +16,10 @@
 
 > 需求呢，其实就是在内部一个中台项目提供一块区域，接入组外不同的业务入口？\
 
-- 发散下，这里其实考虑 2 块，对内和对外
+- 发散下，这里其实核心考虑 2 点，父子交互 与 交互钩子扩展
 
-  1. 其次对内扩展：对内露出公共业务数据，提供给外部使用
-  2. 再有对外延展：对外提供暴露钩子
+  1. 父子交互：子元素通过 postMessage 向父元素请求数据；父元素接收到 message 事件后，将消息数据回调给子元素，以此完成交互；
+  2. 交互钩子扩展：即对外提供的暴露钩子，将公共业务数据通过钩子形式暴露出去；
 
   - 钩子一定要“友好”，这里的“友好”必须具备良好的可读性、数据完善性、语法可提示性；
 
@@ -74,9 +74,59 @@
 
 ## 撸起袖子，干起来
 
-### 设计整体架构
+> 明确该怎么干，要干些什么，这一步需要分层、分点把细节拆分出来
 
-> 明确改怎么干，要干些什么，这一步需要分层、分点把细节拆分出来
+### 实现父子交互
 
-1. 
+- 父元素监听 message 事件，接收消息
+
+```typescript
+function initIFrame(iframe) {
+  // 1. 父元素监听 message
+  window.addEventListener('message', handleMessage, false);
+
+  // 2. 处理消息回调
+  function handleMessage(evt) {
+    // 3. 安全策略：同域名消息拦截
+    if (evt.origin !== window.location.origin) return;
+
+    const { action, data } = evt.data || {};
+    // 4. 处理消息策略
+    switch (action) {
+      case 'A':
+        // todo something
+        break;
+      case 'B':
+        // todo something
+        break;
+    }
+
+    // 5. 回调通知子元素
+    const childWindow = iframe.contentWindow;
+    // 这里通过与子元素定义回调规则，这里假设以 action 同步定义
+    const handler = childWindow[action];
+    handler && handler(something);
+  }
+}
+```
+
+- 定义子元素发起事件规则
+
+> 这个是子元素发起消息时候使用
+
+```typescript
+function postMessageToIFrame(action, payload) {
+  // 1. 定义接收回调数据钩子
+  window[action] = (res) => {
+    // todo something
+  };
+
+  // 2. 向 iframe 发送消息
+  window.parent.postMessage({ action, payload }, window.origin);
+}
+```
+
+### 具体实现
+
+-
 
