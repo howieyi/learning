@@ -16,61 +16,66 @@
 
 > 需求呢，其实就是在内部一个中台项目提供一块区域，接入组外不同的业务入口？\
 
-- 发散下，这里其实核心考虑 2 点，父子交互 与 交互钩子扩展
+> 发散下，这里其实核心考虑 2 点，父子交互 与 交互钩子扩展
 
-  1. 父子交互：子元素通过 postMessage 向父元素请求数据；父元素接收到 message 事件后，将消息数据回调给子元素，以此完成交互；
-  2. 交互钩子扩展：即对外提供的暴露钩子，将公共业务数据通过钩子形式暴露出去；
+> 1. 父子交互：子元素通过 postMessage 向父元素请求数据；父元素接收到 message 事件后，将消息数据回调给子元素，以此完成交互；
+> 2. 交互钩子扩展：即对外提供的暴露钩子，将公共业务数据通过钩子形式暴露出去；
 
-  - 钩子一定要“友好”，这里的“友好”必须具备良好的可读性、数据完善性、语法可提示性；
+- 钩子一定要“友好”，这里的“友好”必须具备良好的可读性、数据完善性、语法可提示性；
 
-  ```typescript
-  // 比方说
-  // 通过会员id获取会员详细信息
+- 常规写法
 
-  // 俗气点的写法
-  function getVipDetail(id) {
-    let info;
+```typescript
+// 比方说
+// 通过会员id获取会员详细信息
+
+// 俗气点的写法
+function getVipDetail(id) {
+  let info;
+  // do something...
+  return info;
+}
+```
+
+- “友好”的写法
+
+```typescript
+/** 会员信息描述 */
+export type IVipDTO = {
+  /** 会员 id */
+  vipId: number | string;
+  /** 会员姓名 */
+  vipName: string;
+  // ...
+};
+
+// 1. 基本注释
+/**
+ * 根据会员id获取会员信息
+ *
+ * @param vipId 会员 id
+ * @return Promise<IVipDTO>
+ */
+// 2. 基本的入参、出参定义
+export const getVipDetail = (vipId: number | string | undefined): Promise<IVipDTO | null> => {
+  // 3. 基本的判空异常
+  if (!vipId) throw new Error('会员ID不能为空');
+
+  return new Promise((resolve, reject) => {
     // do something...
-    return info;
-  }
 
-  // “友好”的写法
-  /** 会员信息描述 */
-  export type IVipDTO = {
-    /** 会员 id */
-    vipId: number | string;
-    /** 会员姓名 */
-    vipName: string;
-    // ...
-  };
+    // 4. 成功抛出
+    resolve(success);
 
-  // 1. 基本注释
-  /**
-   * 根据会员id获取会员信息
-   *
-   * @param vipId 会员 id
-   * @return Promise<IVipDTO>
-   */
-  // 2. 基本的入参、出参定义
-  export const getVipDetail = (vipId: number | string | undefined): Promise<IVipDTO | null> => {
-    // 3. 基本的判空异常
-    if (!vipId) throw new Error('会员ID不能为空');
+    // or
 
-    return new Promise((resolve, reject) => {
-      // do something...
+    // 5. 失败抛出异常
+    reject(fail);
+  });
+};
+```
 
-      // 4. 成功抛出
-      resolve(success);
-
-      // or
-
-      // 5. 失败抛出异常
-      reject(fail);
-    });
-  };
-  ```
-
-  - 其实主要最大限度的减少对外沟通的成本（这里吐槽下，业务组太多，扯皮也很多...一不小心就成了甩锅对象，哎，人多的的地方就有江湖），所以，“友好”真的很重要；
+> 其实主要最大限度的减少对外沟通的成本（这里吐槽下，业务组太多，扯皮也很多...一不小心就成了甩锅对象，哎，人多的的地方就有江湖），所以，“友好”真的很重要；
 
 ## 撸起袖子，干起来
 
@@ -377,7 +382,7 @@ export const bridgeToActionB = () => postMessageToIframe(ActionEnum.actionB);
 
 - 编译产物
 
-![编译产物](./images/pic_2.jpg)
+![编译产物](./images/pic_2.png)
 
 - 发布 `npm publish` 到仓库
 
